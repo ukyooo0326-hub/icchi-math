@@ -42,6 +42,8 @@ def inline(text, src="", lineno=0, chap=""):
     maths = []
 
     def stash(m):
+        if "[[" in m.group(0) or "]]" in m.group(0):
+            warn(src, lineno, "数式 $...$ の中に [[ ]] があります（[[$...$]] の順に書く）")
         if m.group(1) is not None:
             maths.append("\\[" + m.group(1) + "\\]")
         else:
@@ -293,12 +295,29 @@ def render_chapter(meta, chap, items, src, index):
     return "".join(h)
 
 
+def ordered_files(book):
+    """docs/curriculum.md の表に書かれた順（＝履修順）で並べる。表にないファイルは末尾に。"""
+    cur = (ROOT / "docs" / "curriculum.md").read_text(encoding="utf-8")
+    files = {f.name: f for f in (ROOT / book).glob("*.md")}
+    out = []
+    section = cur.split(f"（`{book}/`）")[1].split("\n## ")[0] if f"（`{book}/`）" in cur else ""
+    for name in re.findall(r"^\| `([^`]+\.md)`", section, re.M):
+        if name in files:
+            out.append(files.pop(name))
+        else:
+            warn(f"{book}/{name}", 0, "目次にあるがファイルがありません")
+    for name in sorted(files):
+        warn(f"{book}/{name}", 0, "目次（docs/curriculum.md）に載っていません")
+        out.append(files[name])
+    return out
+
+
 def main():
     check_only = "--check" in sys.argv
     toc, arts = [], []
     idx = 0
     for book, bname, order in BOOKS:
-        files = sorted((ROOT / book).glob("*.md"))
+        files = ordered_files(book)
         entries = []
         for f in files:
             meta, chap, items, src = parse_chapter(f, book)

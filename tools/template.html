@@ -1,0 +1,381 @@
+<title>イッチと解く数学</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDGothic:wght@400;700&family=BIZ+UDPGothic:wght@400;700&family=DotGothic16&display=swap">
+<style>
+/* Layout: 掲示板の「板」= 左の目次レール ＋ 中央のスレ本文カラム。スマホでは目次が上に畳まれる。 */
+:root {
+  --bg: #e9ecea;          /* 板の地 */
+  --paper: #f8f9f8;       /* スレの紙面 */
+  --ink: #1b2320;
+  --muted: #5f6b66;
+  --line: #c9d0cc;
+  --name: #157a35;        /* 5ch の名前欄の緑 */
+  --anchor: #2448b8;
+  --red: #e2222b;         /* 赤シートで消える赤 */
+  --sheet: #c4151d;
+  --s1: #0d7c86; --s2: #3b4cc0; --s3: #b45d00; --s4: #8a3fa8;
+  --hl: #fff3b0;
+  --pop: #ffffff;
+  --bar: #1b2320; --bar-fg: #f8f9f8;
+  --f-disp: "DotGothic16", "BIZ UDGothic", monospace;
+  --f-body: "BIZ UDPGothic", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+  --f-mono: "BIZ UDGothic", "Osaka-Mono", "MS Gothic", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121615; --paper: #1a1f1d; --ink: #e2e7e4; --muted: #9aa69f; --line: #34403b;
+    --name: #5cc47b; --anchor: #8fa8ff; --red: #ff5c63; --sheet: #b3141c;
+    --s1: #4cc3cc; --s2: #9aa6ff; --s3: #f0a246; --s4: #d08ae8; --hl: #4a4220; --pop: #232a27; --bar: #0a0d0c; --bar-fg: #e2e7e4;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121615; --paper: #1a1f1d; --ink: #e2e7e4; --muted: #9aa69f; --line: #34403b;
+  --name: #5cc47b; --anchor: #8fa8ff; --red: #ff5c63; --sheet: #b3141c;
+  --s1: #4cc3cc; --s2: #9aa6ff; --s3: #f0a246; --s4: #d08ae8; --hl: #4a4220; --pop: #232a27; --bar: #0a0d0c; --bar-fg: #e2e7e4;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.75; }
+a { color: var(--anchor); }
+:focus-visible { outline: 2px solid var(--anchor); outline-offset: 2px; }
+
+/* ---- top bar ---- */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--bar); color: var(--bar-fg); border-bottom: 1px solid var(--line);
+  padding-block: 8px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; align-items: center; gap: 8px; }
+.logo { font-family: var(--f-disp); font-size: 1.15rem; color: var(--bar-fg); white-space: nowrap; text-decoration: none; letter-spacing: .02em; }
+.logo small { font-size: .7rem; opacity: .7; margin-left: 6px; }
+.bar .sp { flex: 1; }
+.tg { font: 700 .82rem var(--f-body); border: 1.5px solid var(--bar-fg); background: transparent; color: var(--bar-fg); white-space: nowrap;
+  border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+.tg[aria-pressed="true"] { background: var(--sheet); border-color: var(--sheet); color: #fff; }
+
+/* ---- shell ---- */
+.shell { display: grid; grid-template-columns: 17rem minmax(0, 1fr); gap: 28px; max-width: 76rem; margin: 0 auto;
+  padding-block: 24px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+nav.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 64px); align-self: start; max-height: calc(100vh - 88px); overflow-y: auto;
+  font-size: .88rem; line-height: 1.5; padding-right: 4px; }
+.toc details { margin: 0; }
+.toc summary { display: none; }
+.booktabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 12px; }
+.booktabs button { font: 700 .85rem var(--f-body); padding: 6px 4px; border: 1.5px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer; }
+.booktabs button[aria-selected="true"] { background: var(--ink); color: var(--paper); }
+.toc .order { color: var(--muted); font-size: .75rem; margin: 0 0 10px; }
+.toc h3 { font: 700 .72rem var(--f-mono); letter-spacing: .12em; color: var(--muted); margin: 14px 0 4px; }
+.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
+.toc a { display: flex; gap: 8px; padding: 5px 8px; color: var(--ink); text-decoration: none; border-radius: 4px; }
+.toc a:hover { background: var(--paper); }
+.toc a[aria-current="page"] { background: var(--paper); font-weight: 700; box-shadow: inset 0 0 0 1.5px var(--ink); }
+.toc a .n { font-family: var(--f-mono); color: var(--muted); font-variant-numeric: tabular-nums; min-width: 2.2em; }
+main { min-width: 0; }
+
+/* ---- home ---- */
+.home { display: grid; gap: 28px; max-width: 46rem; }
+.home h1 { font-family: var(--f-disp); font-weight: 400; font-size: clamp(2rem, 6vw, 3.2rem); line-height: 1.2; margin: 0; text-wrap: balance; }
+.home .lede { font-size: 1.05rem; margin: 8px 0 0; color: var(--muted); }
+.steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border: 1.5px solid var(--ink); background: var(--paper); }
+.steps > div { padding: 14px 12px; border-right: 1.5px solid var(--line); min-width: 0; }
+.steps > div:last-child { border-right: 0; }
+.steps b { font-family: var(--f-disp); font-weight: 400; font-size: 1.6rem; display: block; line-height: 1; }
+.steps .k { font-weight: 700; display: block; margin: 6px 0 2px; }
+.steps .d { font-size: .8rem; color: var(--muted); line-height: 1.5; display: block; }
+.steps > div:nth-child(1) b { color: var(--s1); } .steps > div:nth-child(2) b { color: var(--s2); }
+.steps > div:nth-child(3) b { color: var(--s3); } .steps > div:nth-child(4) b { color: var(--s4); }
+.rule { font-family: var(--f-mono); font-weight: 700; font-size: .95rem; border-top: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink); padding: 10px 0; margin: 0; }
+.rule em { font-style: normal; color: var(--red); }
+.books { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.book { background: var(--paper); border: 1px solid var(--line); padding: 18px; min-width: 0; }
+.book h2 { font-family: var(--f-disp); font-weight: 400; font-size: 1.4rem; margin: 0; }
+.book p { margin: 2px 0 10px; color: var(--muted); font-size: .85rem; }
+.book ol { margin: 0; padding-left: 0; list-style: none; font-size: .88rem; columns: 1; }
+.book li { display: flex; gap: 8px; }
+.book li span { font-family: var(--f-mono); color: var(--muted); min-width: 3.4em; font-size: .78rem; padding-top: 2px; }
+.book a { color: var(--ink); }
+.cast { display: grid; gap: 8px; margin: 0; }
+.cast div { display: grid; grid-template-columns: 6.5em minmax(0, 1fr); gap: 8px; font-size: .92rem; }
+.cast dt { font-weight: 700; color: var(--name); }
+.cast dd { margin: 0; }
+
+/* ---- thread ---- */
+.chap { max-width: 46rem; scroll-margin-top: 80px; }
+.thread > * { min-width: 0; }
+.thread-head { margin-bottom: 18px; }
+.unit { font: 700 .78rem var(--f-mono); letter-spacing: .1em; color: var(--muted); margin: 0; }
+.ttl { font-family: var(--f-disp); font-weight: 400; font-size: clamp(1.35rem, 3.6vw, 1.9rem); line-height: 1.4; margin: 4px 0 12px; color: var(--red); text-wrap: balance; }
+.ttl .red { color: inherit; }
+.meta { margin: 0; display: grid; gap: 4px; font-size: .9rem; border-left: 0; }
+.meta div { display: grid; grid-template-columns: 7em minmax(0, 1fr); gap: 8px; }
+.meta dt { color: var(--muted); font-weight: 700; }
+.meta dd { margin: 0; }
+.thread { background: var(--paper); border: 1px solid var(--line); padding: 8px 20px 24px; display: grid; gap: 0; }
+.post { padding: 12px 0 10px; border-bottom: 1px dotted var(--line); scroll-margin-top: 80px; }
+.post:target, .post.flash { background: var(--hl); }
+.ph { font-size: .8rem; color: var(--muted); display: flex; flex-wrap: wrap; column-gap: 8px; align-items: baseline; }
+.ph .no { font-family: var(--f-mono); font-weight: 700; color: var(--ink); text-decoration: none; font-variant-numeric: tabular-nums; }
+.ph .nm { color: var(--name); font-weight: 700; font-size: .88rem; }
+.ph .trip { color: var(--name); font-family: var(--f-mono); }
+.ph .dt, .ph .id { font-family: var(--f-mono); font-size: .72rem; }
+.post.icchi .id { color: var(--red); }
+.pb { padding-left: 1.4em; margin-top: 4px; overflow-wrap: anywhere; }
+.pb p { margin: 0 0 .5em; }
+.pb p:last-child { margin-bottom: 0; }
+.dm { overflow-x: auto; overflow-y: hidden; padding: 2px 0; margin: 2px 0 6px; }
+.anc { text-decoration: none; }
+.anc:hover { text-decoration: underline; }
+.red { color: var(--red); font-weight: 700; }
+.step { --sc: var(--s1); color: var(--sc); display: inline-flex; align-items: baseline; gap: 4px; font-size: .82rem; font-weight: 700;
+  border: 1.5px solid var(--sc); border-radius: 3px; padding: 0 6px 0 0; margin: 0 2px; line-height: 1.6; white-space: nowrap; }
+.step b { background: var(--sc); color: var(--paper); padding: 0 5px; }
+.step.s2 { --sc: var(--s2); } .step.s3 { --sc: var(--s3); } .step.s4 { --sc: var(--s4); }
+
+/* blocks */
+.blk { margin: 18px 0 8px; border: 1.5px solid var(--ink); background: var(--paper); position: relative; }
+.bh { display: flex; gap: 10px; align-items: baseline; padding: 6px 14px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.bl { font: 700 .72rem var(--f-mono); letter-spacing: .12em; background: var(--ink); color: var(--paper); padding: 1px 8px; }
+.bt { font-weight: 700; }
+.bb { padding: 10px 16px 12px; overflow-wrap: anywhere; }
+.bb p { margin: 0 0 .6em; } .bb ul, .bb ol { margin: 0 0 .6em; padding-left: 1.4em; }
+.bb li { margin: 2px 0; }
+.blk.warn { border-style: dashed; border-color: var(--red); }
+.blk.warn .bl { background: var(--red); }
+.blk.exercise .bl { background: var(--anchor); }
+.blk.exercise[data-level="発展"] .bl { background: var(--s4); }
+.blk.check ul { list-style: none; padding-left: 0; }
+.blk.check li { display: grid; grid-template-columns: 1.4em minmax(0, 1fr); }
+.blk.check li::before { content: "□"; font-family: var(--f-mono); }
+details.answer { border: 1.5px solid var(--line); margin-top: -2px; }
+details.answer summary { cursor: pointer; padding: 6px 14px; font-weight: 700; font-size: .88rem; color: var(--anchor); }
+details.answer[open] summary { border-bottom: 1px solid var(--line); }
+.tw { overflow-x: auto; margin: 6px 0 10px; }
+.tw table { border-collapse: collapse; font-size: .9rem; }
+.tw th, .tw td { border: 1px solid var(--line); padding: 4px 10px; text-align: left; }
+.tw th { background: var(--bg); }
+h2.sec { font-family: var(--f-disp); font-weight: 400; font-size: 1.35rem; margin: 30px 0 4px; padding-top: 14px; border-top: 3px double var(--ink); }
+.thread > .blk:first-child { margin-top: 12px; }
+.pager { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; max-width: 46rem; }
+.pager a { display: block; padding: 10px 14px; border: 1.5px solid var(--ink); text-decoration: none; color: var(--ink); background: var(--paper); min-width: 0; }
+.pager a small { display: block; color: var(--muted); font-size: .75rem; }
+.pager a.next { text-align: right; grid-column: 2; }
+
+/* 赤シートモード */
+body.sheet .red { color: transparent; background: var(--sheet); border-radius: 2px; cursor: pointer; }
+body.sheet .red * { color: transparent !important; }
+body.sheet .red mjx-container svg { opacity: 0; }
+body.sheet .red.open { color: var(--red); background: transparent; }
+body.sheet .red.open * { color: inherit !important; }
+body.sheet .red.open mjx-container svg { opacity: 1; }
+body.sheet .ttl .red { color: inherit; background: none; }
+
+/* anchor popup */
+.popup { position: absolute; z-index: 30; max-width: min(34rem, calc(100vw - 32px)); background: var(--pop); border: 1.5px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--line); padding: 4px 14px 10px; font-size: .92rem; }
+.popup .post { border: 0; padding-bottom: 4px; }
+
+@media (max-width: 860px) {
+  .shell { grid-template-columns: minmax(0, 1fr); gap: 16px; padding-block: 12px 48px; }
+  nav.toc { position: static; max-height: none; overflow: visible; }
+  .toc summary { display: block; cursor: pointer; font-weight: 700; padding: 8px 12px; border: 1.5px solid var(--ink); background: var(--paper); }
+  .toc details[open] summary { margin-bottom: 10px; }
+  .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .steps > div:nth-child(2) { border-right: 0; }
+  .steps > div:nth-child(-n+2) { border-bottom: 1.5px solid var(--line); }
+  .books { grid-template-columns: minmax(0, 1fr); }
+  .thread { padding: 4px 12px 18px; }
+  .pb { padding-left: .6em; }
+  .logo small { display: none; }
+  .tg { padding: 3px 10px; font-size: .78rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<header class="bar">
+  <a class="logo" href="#home">イッチと解く数学<small>数学板</small></a>
+  <span class="sp"></span>
+  <button class="tg" id="sheetBtn" type="button" aria-pressed="false">赤シート</button>
+  <button class="tg" id="themeBtn" type="button" aria-label="表示テーマを切り替え">テーマ</button>
+</header>
+
+<div class="shell">
+  <nav class="toc" aria-label="目次">
+    <details id="tocDetails" open>
+      <summary>目次をひらく</summary>
+      <div class="booktabs" role="tablist" id="bookTabs"></div>
+      <p class="order" id="bookOrder"></p>
+      <div id="tocList"></div>
+    </details>
+  </nav>
+  <main id="main">
+    <section class="home" id="home">
+      <div>
+        <h1>イッチと解く数学</h1>
+        <p class="lede">「めんどくさい」は、いちばん合理的な思考のエネルギーになる。<br>数学板に住みつく古参ニキと、数学嫌いのイッチの実況スレで、中1から数IIIまでを順番に解いていく。</p>
+      </div>
+      <div class="steps" aria-label="解法探索4ステップ">
+        <div><b>①</b><span class="k">全体を見る</span><span class="d">ゴールと式の構造を確認する。共通因数でくくる。</span></div>
+        <div><b>②</b><span class="k">知識の利用</span><span class="d">使える公式・解法パターンを検索する。</span></div>
+        <div><b>③</b><span class="k">部分を見る</span><span class="d">ウザい所を切り出す。カタマリを文字で置き換える。</span></div>
+        <div><b>④</b><span class="k">工夫する</span><span class="d">並べ替え・実験・対称性。知っている形に強制送還する。</span></div>
+      </div>
+      <p class="rule">鉄則：④のひらめきはできなくていい。<em>③まではやり切れ。</em></p>
+      <div class="books" id="homeBooks"></div>
+      <dl class="cast">
+        <div><dt>イッチ</dt><dd>スレ主。数学嫌い。口ぐせは「めんどくさい」「帰っていい？」。最後は自分で解く。</dd></div>
+        <div><dt>古参ニキ</dt><dd>数学板の住人。答えは言わず、まず「どこがウザい？」と聞いてくる。</dd></div>
+        <div><dt>名無しさん</dt><dd>イッチの雑さにツッコむ。たまに便乗する。行間を質問してくれる。</dd></div>
+      </dl>
+      <p style="color:var(--muted);font-size:.85rem;margin:0">上の「赤シート」を押すと赤字（定義・公式・答え）が隠れる。隠れた所をタップすると1つずつ見える。</p>
+    </section>
+<!--__CHAPTERS__-->
+    <nav class="pager" id="pager" hidden></nav>
+  </main>
+</div>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [["\\(", "\\)"]], displayMath: [["\\[", "\\]"]] },
+  svg: { fontCache: "global" },
+  startup: { typeset: false }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script>
+<script>
+(function () {
+  const TOC = /*__TOC__*/;
+  const flat = [];
+  TOC.forEach(b => b.chapters.forEach(c => flat.push(Object.assign({ book: b.book, bookName: b.name }, c))));
+  const $ = s => document.querySelector(s);
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  };
+  const label = c => c.grade;
+
+  // home book cards
+  $("#homeBooks").innerHTML = TOC.map(b => `
+    <div class="book"><h2>${b.name}</h2><p>${b.order}</p><ol>${b.chapters.map(c =>
+      `<li><span>${label(c)}</span><a href="#${c.id}">${c.unit}</a></li>`).join("")}</ol></div>`).join("");
+
+  // toc
+  let curBook = store.get("icchi.book") || "chu";
+  function renderToc(active) {
+    $("#bookTabs").innerHTML = TOC.map(b =>
+      `<button type="button" role="tab" data-book="${b.book}" aria-selected="${b.book === curBook}">${b.name}</button>`).join("");
+    const b = TOC.find(x => x.book === curBook) || TOC[0];
+    $("#bookOrder").textContent = b.order;
+    const groups = [];
+    b.chapters.forEach(c => {
+      const g = c.grade || "—";
+      if (!groups.length || groups[groups.length - 1].g !== g) groups.push({ g, items: [] });
+      groups[groups.length - 1].items.push(c);
+    });
+    $("#tocList").innerHTML = groups.map(g => `<h3>${g.g}</h3><ol>${g.items.map((c, i) =>
+      `<li><a href="#${c.id}" ${c.id === active ? 'aria-current="page"' : ""}><span class="n">${c.id.split("-").slice(1).join("-")}</span><span>${c.unit}</span></a></li>`).join("")}</ol>`).join("");
+  }
+  $("#bookTabs").addEventListener("click", e => {
+    const t = e.target.closest("button[data-book]");
+    if (!t) return;
+    curBook = t.dataset.book; store.set("icchi.book", curBook); renderToc(currentId);
+  });
+
+  // routing
+  let currentId = null;
+  const typeset = new Set();
+  function show(id, postId) {
+    const ch = flat.find(c => c.id === id);
+    document.querySelectorAll("main > .chap, main > .home").forEach(el => el.hidden = true);
+    const pager = $("#pager");
+    if (!ch) {
+      $("#home").hidden = false; pager.hidden = true; currentId = null; renderToc(null);
+      window.scrollTo(0, 0); return;
+    }
+    const art = document.getElementById(id);
+    art.hidden = false; currentId = id; curBook = ch.book; store.set("icchi.book", curBook); store.set("icchi.last", id);
+    renderToc(id);
+    const i = flat.indexOf(ch), prev = flat[i - 1], next = flat[i + 1];
+    pager.innerHTML = (prev ? `<a class="prev" href="#${prev.id}"><small>← 前のスレ</small>${prev.unit}</a>` : "") +
+      (next ? `<a class="next" href="#${next.id}"><small>次のスレ →</small>${next.unit}</a>` : "");
+    pager.hidden = false;
+    if (window.innerWidth <= 860) $("#tocDetails").open = false;
+    const done = () => {
+      if (postId) { const p = document.getElementById(postId); if (p) { p.scrollIntoView(); flash(p); } }
+      else window.scrollTo(0, 0);
+    };
+    if (!typeset.has(id) && window.MathJax && MathJax.typesetPromise) {
+      typeset.add(id);
+      MathJax.startup.promise.then(() => MathJax.typesetPromise([art])).then(done).catch(done);
+    } else done();
+  }
+  function flash(el) { el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 1400); }
+  function route() {
+    const h = decodeURIComponent(location.hash.slice(1));
+    if (!h || h === "home") return show(null);
+    if (flat.some(c => c.id === h)) return show(h);
+    const m = h.match(/^(.*)-(\d+)$/);
+    if (m && flat.some(c => c.id === m[1])) {
+      if (currentId === m[1]) { const p = document.getElementById(h); if (p) { p.scrollIntoView(); flash(p); } return; }
+      return show(m[1], h);
+    }
+    show(null);
+  }
+  window.addEventListener("hashchange", route);
+
+  // anchor popup
+  let pop = null;
+  function closePop() { if (pop) { pop.remove(); pop = null; } }
+  document.addEventListener("click", e => {
+    const a = e.target.closest("a.anc");
+    if (a) {
+      e.preventDefault();
+      closePop();
+      const src = document.getElementById(a.dataset.to);
+      if (!src) return;
+      pop = document.createElement("div");
+      pop.className = "popup";
+      pop.appendChild(src.cloneNode(true)).removeAttribute("id");
+      const go = document.createElement("a");
+      go.href = "#" + a.dataset.to; go.textContent = "このレスへ移動"; go.style.fontSize = ".8rem";
+      go.addEventListener("click", closePop);
+      pop.appendChild(go);
+      document.body.appendChild(pop);
+      const r = a.getBoundingClientRect();
+      const left = Math.max(16, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - pop.offsetWidth - 16));
+      pop.style.left = left + "px";
+      pop.style.top = (r.bottom + window.scrollY + 6) + "px";
+      return;
+    }
+    if (pop && !e.target.closest(".popup")) closePop();
+    const red = e.target.closest(".red");
+    if (red && document.body.classList.contains("sheet")) red.classList.toggle("open");
+  });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") closePop();
+    if ((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("red") && document.body.classList.contains("sheet")) {
+      e.preventDefault(); e.target.classList.toggle("open");
+    }
+  });
+
+  // red sheet
+  const sheetBtn = $("#sheetBtn");
+  function setSheet(on) {
+    document.body.classList.toggle("sheet", on);
+    sheetBtn.setAttribute("aria-pressed", String(on));
+    if (!on) document.querySelectorAll(".red.open").forEach(r => r.classList.remove("open"));
+    store.set("icchi.sheet", on ? "1" : "0");
+  }
+  sheetBtn.addEventListener("click", () => setSheet(!document.body.classList.contains("sheet")));
+  setSheet(store.get("icchi.sheet") === "1");
+
+  // theme
+  $("#themeBtn").addEventListener("click", () => {
+    const root = document.documentElement;
+    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+  });
+
+  route();
+})();
+</script>

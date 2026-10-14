@@ -273,7 +273,7 @@ window.MathJax = {
       groups[groups.length - 1].items.push(c);
     });
     $("#tocList").innerHTML = groups.map(g => `<h3>${g.g}</h3><ol>${g.items.map((c, i) =>
-      `<li><a href="#${c.id}" ${c.id === active ? 'aria-current="page"' : ""}><span class="n">${c.id.split("-").slice(1).join("-")}</span><span>${c.unit}</span></a></li>`).join("")}</ol>`).join("");
+      `<li><a href="#${c.id}" ${c.id === active ? 'aria-current="page"' : ""}><span class="n">${String(b.chapters.indexOf(c)).padStart(2, "0")}</span><span>${c.unit}</span></a></li>`).join("")}</ol>`).join("");
   }
   $("#bookTabs").addEventListener("click", e => {
     const t = e.target.closest("button[data-book]");

@@ -325,6 +325,9 @@ def main():
             idx += 1
             unit = meta.get("unit", f.stem)
             grade, _, uname = unit.partition("・")
+            grade = grade.replace("数学", "数")
+            if f.stem.startswith("0-00"):
+                grade, uname = "はじめに", "高校数学と4ステップ" if uname in ("", "はじめに") else uname
             entries.append({"id": chap, "grade": grade, "unit": uname or unit,
                             "posts": sum(1 for it in items if it[0] == "post")})
         toc.append({"book": book, "name": bname, "order": order, "chapters": entries})

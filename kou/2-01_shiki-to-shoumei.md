@@ -236,7 +236,7 @@ $$\left(a + \frac{1}{b}\right)\left(b + \frac{4}{a}\right) = ab + 4 + 1 + \frac{
 $\dfrac{1}{b} \cdot b = 1$、$\dfrac{1}{b} \cdot \dfrac{4}{a} = \dfrac{4}{ab}$
 
 @46 イッチ
-【③部分を見る】$ab$ と $\dfrac{4}{ab}$ はかけたら $4$ で一定や
+【③部分を見る】$ab > 0$ で、$ab$ と $\dfrac{4}{ab}$ はかけたら $4$ で一定や
 $$ab + \frac{4}{ab} + 5 \ge 2\sqrt{ab \cdot \frac{4}{ab}} + 5 = 4 + 5 = 9$$
 等号は $ab = \dfrac{4}{ab}$ → $(ab)^2 = 4$ → $ab > 0$ より $ab = 2$
 たとえば $a = 1,\ b = 2$ で成立するから、最小値 $9$
